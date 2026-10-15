@@ -36,3 +36,5 @@ The offline checks compile the Mastra agent and tools, then verify duplicate pre
 The future integration seam is the CLI task, a per-case state file, JSON completion output, and the state/audit diff. Add it only against the released new Firedrill interface. No retired commands, simulated report, or CI Firedrill run is claimed here. This repository is private and unlicensed pending portfolio publication decisions.
 
 Implementation reference: [Mastra agent and tool documentation](https://mastra.ai/docs).
+
+Explore related applications in the [Firedrill example catalog](https://github.com/firedrill-tools/firedrill-example-catalog). Product and setup references: [Firedrill](https://firedrill.run/) and the [official developer documentation](https://docs.firedrill.run/). Use documentation matching the qualified release; this repository records its current integration limits above.
