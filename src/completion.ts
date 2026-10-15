@@ -9,6 +9,7 @@ export interface StepObservation {
   toolCalls: unknown[];
   sdkUsage: unknown;
   rejectedReason: string | null;
+  sdkError?: { name: string; message: string; statusCode: number | null; requestId: string | null; responseBody: string | null; responseBodyTruncated: boolean };
 }
 type Part = Record<string, unknown>;
 type Result = { stream?: ReadableStream<Part>; content?: Part[]; finishReason?: unknown; usage?: unknown };
@@ -72,8 +73,15 @@ export function guardModel(model: MastraLanguageModel | string, observations?: S
           // Preserve native chunks/metadata, releasing them only after validation.
           return buffered ? { ...result, stream: new ReadableStream<Part>({ start(controller) { for (const part of buffered) controller.enqueue(part); controller.close(); } }) } : result;
         } catch (error) {
-          observed.rejectedReason = error instanceof Error ? error.message : String(error);
-          if (error instanceof Error) Object.assign(error, { modelObservation: observed });
+          observed.rejectedReason = error instanceof Error ? error.message || error.name : String(error);
+          if (error instanceof Error) {
+            const status = Reflect.get(error, "statusCode"), headers = Reflect.get(error, "responseHeaders"), body = Reflect.get(error, "responseBody");
+            const bytes = typeof body === "string" ? Buffer.from(body) : null;
+            observed.sdkError = { name: error.name, message: error.message, statusCode: typeof status === "number" ? status : null,
+              requestId: headers && typeof headers["request-id"] === "string" ? headers["request-id"] : null,
+              responseBody: bytes ? bytes.subarray(0, 1_048_576).toString("utf8") : null, responseBodyTruncated: (bytes?.length ?? 0) > 1_048_576 };
+            Object.assign(error, { modelObservation: observed });
+          }
           throw error;
         } finally {
           if (reader) { await reader.cancel().catch(() => {}); reader.releaseLock(); }

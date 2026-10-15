@@ -11,11 +11,12 @@ export interface RunOptions {
   model: string;
   allowWrites: boolean;
   observations?: StepObservation[];
+  signal?: AbortSignal;
 }
 
 export function buildCoordinator(options: RunOptions, model: MastraLanguageModel | string = options.model) {
   if (!options.model.startsWith("anthropic/")) throw new Error("model must use the anthropic/<model> format");
-  if (!options.task.trim()) throw new Error("task must not be blank");
+  if (!options.task.trim() || options.task.length > 8000) throw new Error("task must contain 1–8000 characters");
   const workspace = new Workspace(options.statePath);
   if (options.allowWrites) {
     const request = workspace.beginRequest(options.requestId, options.task);
@@ -24,6 +25,13 @@ export function buildCoordinator(options: RunOptions, model: MastraLanguageModel
   return new Agent({
     id: "project-coordinator",
     name: "Project Coordinator",
+    maxRetries: 0,
+    // Model retry settings do not disable the default stability processors.
+    errorProcessorDefaults: false,
+    maxProcessorRetries: 0,
+    errorProcessors: [],
+    defaultOptions: { maxSteps: 8, abortSignal: options.signal,
+      modelSettings: { maxRetries: 0, maxOutputTokens: 4096, timeout: { totalMs: 240_000, stepMs: 30_000 } } },
     model: guardModel(model, options.observations),
     instructions: `You coordinate work in a fictional Northstar Notes workspace. The available tools expose a narrow local issue tracker, repository directory, and Slack-style channel store. These tools never contact real services. Use one tool per model step.
 
@@ -53,9 +61,15 @@ export async function coordinate(options: RunOptions) {
   const observations: StepObservation[] = [];
   const agent = buildCoordinator({ ...options, observations });
   let response: Generated;
-  try { response = await agent.generate(options.task, { maxSteps: 8 }); }
+  try { response = await agent.generate(options.task, { maxSteps: 8 }); options.signal?.throwIfAborted(); }
   catch (error) {
-    if (error instanceof Error) Object.assign(error, { observations });
+    if (error instanceof Error) {
+      if (!error.message) {
+        const status = Reflect.get(error, "statusCode");
+        error.message = `provider request failed${typeof status === "number" ? ` (HTTP ${status})` : ""}`;
+      }
+      Object.assign(error, { observations });
+    }
     throw error;
   }
   const state = loadState(options.statePath);

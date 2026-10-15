@@ -38,15 +38,21 @@ async function main() {
     return;
   }
   if (args[0] === "run") {
-    const outcome = await coordinate({
-      statePath: resolve(required(args, "--state")),
-      task: required(args, "--task"),
-      requestId: args.includes("--request-id") ? required(args, "--request-id") : randomUUID(),
-      model: args.includes("--model") ? required(args, "--model") : process.env.COORDINATOR_MODEL ?? "anthropic/claude-sonnet-4-6",
-      allowWrites: args.includes("--allow-writes"),
-    });
-    console.log(JSON.stringify(outcome));
-    if (outcome.executionStatus !== "completed") process.exitCode = 1;
+    const controller = new AbortController();
+    const stop = () => controller.abort(new Error("coordinate interrupted"));
+    process.once("SIGINT", stop); process.once("SIGTERM", stop);
+    try {
+      const outcome = await coordinate({
+        signal: controller.signal,
+        statePath: resolve(required(args, "--state")),
+        task: required(args, "--task"),
+        requestId: args.includes("--request-id") ? required(args, "--request-id") : randomUUID(),
+        model: args.includes("--model") ? required(args, "--model") : process.env.COORDINATOR_MODEL ?? "anthropic/claude-sonnet-4-6",
+        allowWrites: args.includes("--allow-writes"),
+      });
+      console.log(JSON.stringify(outcome));
+      if (outcome.executionStatus !== "completed") process.exitCode = 1;
+    } finally { process.removeListener("SIGINT", stop); process.removeListener("SIGTERM", stop); }
     return;
   }
   throw new Error(`unknown command: ${args[0]}`);
