@@ -1,0 +1,18 @@
+{
+  "synthetic": true,
+  "version": 1,
+  "repositories": [
+    { "slug": "northstar/web-app", "description": "Customer-facing Northstar Notes web application" },
+    { "slug": "northstar/infra", "description": "Deployment and operations configuration" }
+  ],
+  "issues": [
+    {
+      "id": "N-101", "repository": "northstar/web-app", "title": "Admin invite button returns a permission error",
+      "body": "An account admin cannot invite a teammate from the workspace settings page. The owner updated this during review.",
+      "status": "in_progress", "revision": 3, "requestId": "seed-101"
+    }
+  ],
+  "channels": ["product", "engineering"],
+  "posts": [],
+  "audit": []
+}
