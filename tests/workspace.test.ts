@@ -34,9 +34,9 @@ test("create is idempotent and rejects unknown repositories", () => {
 test("stale status write is rejected without changing state", () => {
   const path = stateCopy("stale-workspace.json");
   const store = new Workspace(path);
-  assert.equal(store.updateIssue("N-101", "done", 1).ok, false);
+  assert.equal(store.updateIssue("N-101", "done", 1, "update-1").ok, false);
   assert.equal(loadState(path).issues[0].status, "in_progress");
-  assert.equal(store.updateIssue("N-101", "done", 3).ok, true);
+  assert.equal(store.updateIssue("N-101", "done", 3, "update-1").ok, true);
   assert.equal(loadState(path).issues[0].revision, 4);
 });
 
@@ -47,4 +47,11 @@ test("channel post uses an exact channel and one request ID", () => {
   assert.equal(store.postMessage("product", "Issue N-101 exists", "req-2:post").ok, true);
   assert.equal(store.postMessage("product", "Issue N-101 exists", "req-2:post").ok, true);
   assert.equal(loadState(path).posts.length, 1);
+});
+
+test("repeating the same status does not advance the issue revision twice", () => {
+  const path = stateCopy(); const store = new Workspace(path);
+  assert.equal(store.updateIssue("N-101", "done", 1, "retry-1").ok, true);
+  assert.equal(store.updateIssue("N-101", "done", 2, "retry-1").ok, true);
+  assert.equal(loadState(path).issues[0].revision, 2);
 });

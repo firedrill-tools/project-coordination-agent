@@ -1,0 +1,118 @@
+{
+  "synthetic": true,
+  "version": 1,
+  "repositories": [
+    {
+      "slug": "northstar/web-app",
+      "description": "Customer-facing Northstar Notes web application",
+      "ownerTeam": "Web Experience",
+      "channel": "product"
+    },
+    {
+      "slug": "northstar/infra",
+      "description": "Deployment and operations configuration",
+      "ownerTeam": "Platform",
+      "channel": "engineering"
+    },
+    {
+      "slug": "northstar/mobile-app",
+      "description": "Northstar Notes mobile application",
+      "ownerTeam": "Mobile",
+      "channel": "mobile"
+    }
+  ],
+  "issues": [
+    {
+      "id": "N-101",
+      "repository": "northstar/web-app",
+      "title": "Admin invite button returns a permission error",
+      "body": "An account admin cannot invite a teammate from the workspace settings page.",
+      "status": "open",
+      "revision": 1,
+      "requestId": "seed-101"
+    },
+    {
+      "id": "N-102",
+      "repository": "northstar/infra",
+      "title": "Build pipeline has intermittent latency",
+      "body": "Nightly build can take over 20 minutes.",
+      "status": "open",
+      "revision": 1,
+      "requestId": "seed-102"
+    },
+    {
+      "id": "N-103",
+      "repository": "northstar/web-app",
+      "title": "Sync recovery after reconnect",
+      "body": "Offline edits are delayed after a browser reconnect.",
+      "status": "in_progress",
+      "revision": 2,
+      "requestId": "seed-103"
+    },
+    {
+      "id": "N-104",
+      "repository": "northstar/web-app",
+      "title": "Keyboard shortcut in search",
+      "body": "The search panel does not close with Escape.",
+      "status": "open",
+      "revision": 1,
+      "requestId": "seed-104"
+    },
+    {
+      "id": "N-105",
+      "repository": "northstar/infra",
+      "title": "Runner disk pressure",
+      "body": "The synthetic staging build runner needs cache cleanup.",
+      "status": "open",
+      "revision": 2,
+      "requestId": "seed-105"
+    },
+    {
+      "id": "N-106",
+      "repository": "northstar/mobile-app",
+      "title": "Offline draft recovery",
+      "body": "Mobile draft recovery is under review after a reconnect.",
+      "status": "in_progress",
+      "revision": 3,
+      "requestId": "seed-106"
+    }
+  ],
+  "channels": [
+    "product",
+    "engineering",
+    "mobile"
+  ],
+  "posts": [
+    {
+      "id": "post-1",
+      "channel": "engineering",
+      "text": "N-102 remains open while pipeline latency is investigated.",
+      "requestId": "seed-102:post"
+    },
+    {
+      "id": "post-2",
+      "channel": "mobile",
+      "text": "N-106 is in progress with the Mobile team.",
+      "requestId": "seed-106:post"
+    }
+  ],
+  "audit": [
+    {
+      "operation": "post_message",
+      "target": "post-1",
+      "outcome": "success"
+    },
+    {
+      "operation": "post_message",
+      "target": "post-2",
+      "outcome": "success"
+    }
+  ],
+  "dataset": {
+    "id": "synthetic-project-workspace",
+    "version": 1,
+    "profile": "busy"
+  },
+  "requests": [],
+  "updates": []
+}

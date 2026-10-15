@@ -41,11 +41,12 @@ async function main() {
     const outcome = await coordinate({
       statePath: resolve(required(args, "--state")),
       task: required(args, "--task"),
-      requestId: option(args, "--request-id") ?? randomUUID(),
-      model: option(args, "--model") ?? process.env.COORDINATOR_MODEL ?? "anthropic/claude-sonnet-4-6",
+      requestId: args.includes("--request-id") ? required(args, "--request-id") : randomUUID(),
+      model: args.includes("--model") ? required(args, "--model") : process.env.COORDINATOR_MODEL ?? "anthropic/claude-sonnet-4-6",
       allowWrites: args.includes("--allow-writes"),
     });
     console.log(JSON.stringify(outcome));
+    if (outcome.executionStatus !== "completed") process.exitCode = 1;
     return;
   }
   throw new Error(`unknown command: ${args[0]}`);

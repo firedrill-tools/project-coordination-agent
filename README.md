@@ -14,13 +14,28 @@ export ANTHROPIC_API_KEY='your-key-from-a-secret-manager'
 npm run coordinate -- run --state run-output/workspace.json --task "Find the admin invite issue and summarize its status"
 ```
 
-The default model is `anthropic/claude-sonnet-4-6`; change it with `COORDINATOR_MODEL` or `--model`. A run makes a real model call and may incur provider cost. It prints JSON after `agent.generate()` returns, including the answer, model, reported usage if available, and state counts. The state file retains exact issue and channel effects plus an audit. There is no hidden production-service fallback.
+The default model is `anthropic/claude-sonnet-4-6`; change it with `COORDINATOR_MODEL` or `--model`. A run makes a real model call and may incur provider cost. The JSON receipt includes `executionStatus`, SDK `finishReason`, answer, requested/response model identifiers, state counts and usage observations. A stopped loop with a final answer is `completed`; step/token limits and unfinished tool loops are `incomplete` and exit nonzero, even if the model emitted progress text. Inspect actual state before retrying partial work. A completed execution is not a correctness score.
 
-To let the agent make synthetic changes, pass `--allow-writes`. Supply a stable `--request-id` when retrying; issue and channel operations reject reuse for a different payload. Issue updates require a current revision and reject stale writes. A duplicate title in the same repository is rejected, and channel names must be in the fixture.
+`usage` covers all steps only when each step has reported measurements. `lastStepUsage` is separate, `stepUsage` preserves the available SDK observations, and missing totals/cost remain null. Do not infer price or treat unreported usage as zero. The state file retains exact issue and channel effects plus an audit. There is no production-service fallback.
+
+To let the agent make synthetic changes, pass `--allow-writes`. Supply a stable `--request-id` when retrying. The application binds it to the original task and injects operation IDs into the tools; model arguments cannot replace them. A changed task requires a new ID. One caller request can create one issue, choose one status per issue, and post one channel message. Additional intent uses a new request ID.
+
+Issue creation and posts reject a different payload under the same ID. Status updates require a current revision for the first commit. Replays preserve the revision, return `replayed: true` and current issue state, and cannot undo a later request's changes. Titles are normalized for case/whitespace duplicate checks within the exact repository. The directory exposes owner teams and supported channels; the model can inspect recent channel posts when checking an earlier notification.
+
+| Tool | Local supported operation |
+|---|---|
+| `listRepositories` | Exact slugs, descriptions, owner teams, repository channels and available channels |
+| `findIssues` | Title/body search, optionally scoped to an exact repository |
+| `readChannel` | Last 20 posts for an exact supported channel; no pagination |
+| `createIssue` | One caller-bound issue creation with normalized-title duplicate checks |
+| `updateIssue` | Revision-checked status update with replay/current-state evidence |
+| `postMessage` | One caller-bound post in an available channel |
+
+Without `--allow-writes`, write tools reject changes and no write-request journal entry is created. With authorization, task bindings survive model failure so a retry can retain its identity. Tools reload state per operation; this is a sequential local store, with no cross-process transaction lock. Saves flush a temporary file before replacement and clean up the staged file.
 
 ## Scenarios and reset
 
-Two fictional fixtures and five case briefs are in [scenarios/README.md](scenarios/README.md). Start each independent case with a new `run-output/` state path. Do not run concurrent writers against one file. This app offers no external service reset or broad vendor compatibility. The seed fixture is unchanged by runs.
+Five fictional fixtures embed dataset `synthetic-project-workspace`, version `1`: starter, stale revision, busy ordinary, ambiguous cross-repository titles and no available channels. The busy profile has three repositories, six issues and earlier owner-team posts. See [scenarios/README.md](scenarios/README.md) for case inputs and their profile. Start each independent case with a new `run-output/` state path; `init` refuses to overwrite it. Stop the owning CLI process before deleting/replacing its copy. No external service is reset, and the committed seed is unchanged by runs.
 
 ## Offline check and CI
 
@@ -29,7 +44,9 @@ npm ci
 npm run check
 ```
 
-The offline checks compile the Mastra agent and tools, then verify duplicate prevention, repository selection, stale revisions, and channel effects in the application state. They make no model request and cannot establish live agent quality. An authorized live run and measured evidence remain pending.
+The 18 offline checks include an actual Mastra `generate()` loop with the SDK's scripted model, actual tool execution and persisted state effects. They verify caller-owned IDs, read-only behavior, status replay after later work, partial recovery, busy/ambiguous data, all-step versus last-step usage, missing measurements and incomplete-loop reporting. Scripted token values exercise serialization; they are not live provider usage or a benchmark. An authorized live Claude run and measured evidence remain pending. Direct dependencies are Mastra `1.77.0` and Zod `4.6.7`, resolved in `package-lock.json`.
+
+The inherited Mastra/gray-matter dependency chain currently has five moderate `npm audit --omit=dev` findings. Requalifying that chain remains a publication-readiness task.
 
 ## Firedrill connection and limits
 
