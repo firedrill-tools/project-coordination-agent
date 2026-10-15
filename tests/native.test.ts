@@ -16,13 +16,18 @@ async function native(t: TestContext, kind: string) {
   // another test's fetch closure. No real credential or provider request is used.
   process.env.ANTHROPIC_API_KEY = `synthetic-${randomUUID()}`;
   const controller = new AbortController(), fetchSignals: AbortSignal[] = [];
+  const pendingHandles = new Set<ReturnType<typeof setInterval>>();
   const requests: { url: string; body: Record<string, unknown> }[] = [], observations: StepObservation[] = [];
   globalThis.fetch = async (url, init) => {
     assert.ok(init?.body); const body = JSON.parse(String(init.body)); requests.push({ url: String(url), body }); if (init.signal) fetchSignals.push(init.signal);
     const first = requests.length === 1;
     if (kind === "outage" && !first) return new Response(JSON.stringify({ type: "error", error: { type: "overloaded_error", message: "synthetic outage after issue" } }), { status: 503, headers: { "content-type": "application/json", "request-id": "synthetic-failed-request" } });
     if (["cancel", "deadline"].includes(kind)) return await new Promise<Response>((_resolve, reject) => {
-      assert.ok(init.signal); if (init.signal.aborted) { reject(init.signal.reason); return; } init.signal.addEventListener("abort", () => reject(init.signal!.reason), { once: true });
+      assert.ok(init.signal); if (init.signal.aborted) { reject(init.signal.reason); return; }
+      // SDK deadline timers are unref'd. A real pending fetch owns a socket;
+      // the controlled promise needs an equivalent owned handle under Node 22.
+      const handle = setInterval(() => {}, 1000); pendingHandles.add(handle);
+      init.signal.addEventListener("abort", () => { clearInterval(handle); pendingHandles.delete(handle); reject(init.signal!.reason); }, { once: true });
       if (kind === "cancel") queueMicrotask(() => controller.abort(new Error("synthetic caller cancellation")));
     });
     const call = { type: "tool_use", id: "synthetic-tool-1", name: "createIssue", input: { repository: "northstar/web-app", title: "Native completion proof", body: "Fictional controlled provider response" } };
@@ -39,6 +44,7 @@ async function native(t: TestContext, kind: string) {
       return { response, error: null, state: loadState(statePath), requests, observations, fetchSignals };
     } catch (error) { return { response: null, error, state: loadState(statePath), requests, observations, fetchSignals }; }
   } finally {
+    for (const handle of pendingHandles) clearInterval(handle);
     globalThis.fetch = savedFetch;
     if (savedKey === undefined) delete process.env.ANTHROPIC_API_KEY; else process.env.ANTHROPIC_API_KEY = savedKey;
   }
