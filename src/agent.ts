@@ -30,8 +30,8 @@ Before creating an issue, list repositories and search for an existing one. Use 
 }
 
 type Generated = Awaited<ReturnType<Agent["generate"]>>;
-export function completedResponse(response: Pick<Generated, "finishReason" | "text">): boolean {
-  return response.finishReason === "stop" && response.text.trim().length > 0;
+export function completedResponse(response: Pick<Generated, "finishReason" | "steps">): boolean {
+  return response.finishReason === "stop" && (response.steps.at(-1)?.text.trim().length ?? 0) > 0;
 }
 
 export function modelObservation(response: Pick<Generated, "steps" | "response" | "totalUsage">) {
@@ -55,7 +55,8 @@ export async function coordinate(options: RunOptions) {
     finishReason: response.finishReason,
     model: options.model,
     requestId: options.requestId,
-    answer: response.text,
+    answer: response.steps.at(-1)?.text ?? "",
+    progressText: response.steps.slice(0, -1).map(step => step.text).filter(text => text.trim()),
     ...modelObservation(response),
     issueCount: state.issues.length,
     postCount: state.posts.length,

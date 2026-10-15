@@ -17,7 +17,7 @@ function seeded(t: TestContext, fixture = "starter-workspace.json") {
   return path;
 }
 
-function scriptedModel() {
+function scriptedModel(emptyFinal = false) {
   let step = 0;
   return new MastraLanguageModelV2Mock({
     modelId: "scripted-coordinator",
@@ -29,7 +29,7 @@ function scriptedModel() {
         : { channel: "engineering", text: "The web-app sync issue is recorded." });
       return { content: index < 2
         ? [{ type: "text" as const, text: "Processing the synthetic request." }, { type: "tool-call" as const, toolCallId: `call-${index}`, toolName, input }]
-        : [{ type: "text" as const, text: "Recorded the synthetic issue and engineering update." }],
+        : emptyFinal ? [] : [{ type: "text" as const, text: "Recorded the synthetic issue and engineering update." }],
         finishReason: index < 2 ? "tool-calls" : "stop", warnings: [],
         usage: { inputTokens: (index + 1) * 10, outputTokens: index + 2, totalTokens: (index + 1) * 10 + index + 2 } };
     },
@@ -182,4 +182,14 @@ test("a bounded loop with progress text cannot claim a completed execution", asy
   assert.equal(completedResponse(response), false);
   assert.equal(loadState(statePath).issues.length, 3);
   assert.equal(loadState(statePath).posts.length, 0);
+});
+
+test("earlier progress text cannot replace an empty terminal answer", async t => {
+  const statePath = seeded(t);
+  const agent = buildCoordinator({ statePath, task: "Record an issue and notify engineering", requestId: "empty-final", model: "anthropic/scripted", allowWrites: true }, scriptedModel(true));
+  const response = await agent.generate("Record the synthetic issue and notify engineering", { maxSteps: 8 });
+  assert.equal(response.finishReason, "stop");
+  assert.ok(response.text.trim());
+  assert.equal(response.steps.at(-1)?.text, "");
+  assert.equal(completedResponse(response), false);
 });

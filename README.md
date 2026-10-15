@@ -14,7 +14,7 @@ export ANTHROPIC_API_KEY='your-key-from-a-secret-manager'
 npm run coordinate -- run --state run-output/workspace.json --task "Find the admin invite issue and summarize its status"
 ```
 
-The default model is `anthropic/claude-sonnet-4-6`; change it with `COORDINATOR_MODEL` or `--model`. A run makes a real model call and may incur provider cost. The JSON receipt includes `executionStatus`, SDK `finishReason`, answer, requested/response model identifiers, state counts and usage observations. A stopped loop with a final answer is `completed`; step/token limits and unfinished tool loops are `incomplete` and exit nonzero, even if the model emitted progress text. Inspect actual state before retrying partial work. A completed execution is not a correctness score.
+The default model is `anthropic/claude-sonnet-4-6`; change it with `COORDINATOR_MODEL` or `--model`. A run makes a real model call and may incur provider cost. The JSON receipt includes `executionStatus`, SDK `finishReason`, the terminal `answer`, earlier `progressText`, requested/response model identifiers, state counts and usage observations. A stopped loop with a terminal answer is `completed`; step/token limits, unfinished tool loops and empty final answers are `incomplete` and exit nonzero, even if the model emitted earlier progress text. Inspect actual state before retrying partial work. A completed execution is not a correctness score.
 
 `usage` covers all steps only when each step has reported measurements. `lastStepUsage` is separate, `stepUsage` preserves the available SDK observations, and missing totals/cost remain null. Do not infer price or treat unreported usage as zero. The state file retains exact issue and channel effects plus an audit. There is no production-service fallback.
 
@@ -44,7 +44,7 @@ npm ci
 npm run check
 ```
 
-The 18 offline checks include an actual Mastra `generate()` loop with the SDK's scripted model, actual tool execution and persisted state effects. They verify caller-owned IDs, read-only behavior, status replay after later work, partial recovery, busy/ambiguous data, all-step versus last-step usage, missing measurements and incomplete-loop reporting. Scripted token values exercise serialization; they are not live provider usage or a benchmark. An authorized live Claude run and measured evidence remain pending. Direct dependencies are Mastra `1.77.0` and Zod `4.6.7`, resolved in `package-lock.json`.
+The 19 offline checks include an actual Mastra `generate()` loop with the SDK's scripted model, actual tool execution and persisted state effects. They verify caller-owned IDs, read-only behavior, status replay after later work, partial recovery, busy/ambiguous data, all-step versus last-step usage, missing measurements, incomplete loops and empty terminal answers. Scripted token values exercise serialization; they are not live provider usage or a benchmark. An authorized live Claude run and measured evidence remain pending. Direct dependencies are Mastra `1.77.0` and Zod `4.6.7`, resolved in `package-lock.json`.
 
 The inherited Mastra/gray-matter dependency chain currently has five moderate `npm audit --omit=dev` findings. Requalifying that chain remains a publication-readiness task.
 
