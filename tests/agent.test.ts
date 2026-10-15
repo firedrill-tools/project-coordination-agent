@@ -184,12 +184,12 @@ test("a bounded loop with progress text cannot claim a completed execution", asy
   assert.equal(loadState(statePath).posts.length, 0);
 });
 
-test("earlier progress text cannot replace an empty terminal answer", async t => {
+test("earlier progress cannot replace a rejected empty terminal answer", async t => {
   const statePath = seeded(t);
-  const agent = buildCoordinator({ statePath, task: "Record an issue and notify engineering", requestId: "empty-final", model: "anthropic/scripted", allowWrites: true }, scriptedModel(true));
-  const response = await agent.generate("Record the synthetic issue and notify engineering", { maxSteps: 8 });
-  assert.equal(response.finishReason, "stop");
-  assert.ok(response.text.trim());
-  assert.equal(response.steps.at(-1)?.text, "");
-  assert.equal(completedResponse(response), false);
+  const observations: import("../src/agent.js").StepObservation[] = [];
+  const agent = buildCoordinator({ statePath, task: "Record issue and update", requestId: "empty-final", model: "anthropic/scripted", allowWrites: true, observations }, scriptedModel(true));
+  await assert.rejects(agent.generate("Record issue and update", { maxSteps: 8 }), /terminal answer/);
+  assert.equal(observations.length, 3); assert.equal(observations.at(-1)?.text, "");
+  assert.match(observations.at(-1)?.rejectedReason ?? "", /terminal answer/);
+  assert.equal(loadState(statePath).issues.length, 3); // earlier authorized effects remain committed
 });
