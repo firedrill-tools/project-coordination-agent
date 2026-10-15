@@ -46,7 +46,7 @@ npm run check
 
 The 19 offline checks include an actual Mastra `generate()` loop with the SDK's scripted model, actual tool execution and persisted state effects. They verify caller-owned IDs, read-only behavior, status replay after later work, partial recovery, busy/ambiguous data, all-step versus last-step usage, missing measurements, incomplete loops and empty terminal answers. Scripted token values exercise serialization; they are not live provider usage or a benchmark. An authorized live Claude run and measured evidence remain pending. Direct dependencies are Mastra `1.77.0` and Zod `4.6.7`, resolved in `package-lock.json`.
 
-The inherited Mastra/gray-matter dependency chain currently has five moderate `npm audit --omit=dev` findings. Requalifying that chain remains a publication-readiness task.
+The scoped argparse override removes the inherited `sprintf-js` dependency while preserving Mastra's YAML front-matter and CLI contracts. A guarded install-time repair retains the legacy CLI version option. See [scripts/README.md](scripts/README.md) for the exact compatibility change and removal criteria. Fresh `npm ci`, all 22 checks, and `npm audit` pass (zero findings at the 2026-10-15 snapshot).
 
 ## Firedrill connection and limits
 
