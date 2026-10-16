@@ -1,67 +1,91 @@
-# Coordinate project work with a Mastra agent
+# Coordinate project handoffs with Mastra and Anthropic
 
-This TypeScript application uses a Mastra agent to find existing issues, create or update issues, and post concise project updates. It works against one coherent fictional workspace containing repository metadata, an issue tracker, and Slack-style channels. Tools are direct `createTool()` functions with explicit state and error behavior; no real GitHub, issue-tracker, or Slack account is used.
+Find the right repository and issue, read its current revision, update its status and notify its owner team. This TypeScript application uses a real Mastra agent and Anthropic Messages adapter against a coherent fictional issue tracker, repository directory and Slack-style channel store. State changes and model observations remain inspectable after failures.
 
-## Run one task
+## Run one case
 
-Requires Node.js 22.13+ and an Anthropic API key for model requests:
+Requires Node.js 22.13+, npm and `ANTHROPIC_API_KEY` for model execution. Listing, initialization and offline checks need no key.
 
 ```sh
 npm ci
 npm run build
-npm run coordinate -- init --seed fixtures/starter-workspace.json --state run-output/workspace.json
-export ANTHROPIC_API_KEY='your-key-from-a-secret-manager'
-npm run coordinate -- run --state run-output/workspace.json --task "Find the admin invite issue and summarize its status"
+npm run coordinate -- list
+npm run coordinate -- init --case busy --state run-output/workspace.json
+npm run coordinate -- run --state run-output/workspace.json \
+  --request-id case-busy --allow-writes \
+  --task 'Mark N-103 (Sync recovery after reconnect) in northstar/web-app done and post its current status to the repository owner channel. Preserve all other issues and prior posts.'
 ```
 
-The default model is `anthropic/claude-sonnet-4-6`; change it with `COORDINATOR_MODEL` or `--model`. A run makes a real model call and may incur provider cost. The JSON receipt includes `executionStatus`, SDK `finishReason`, the terminal `answer`, earlier `progressText`, requested/response model identifiers, state counts and usage observations. A stopped loop with a terminal answer is `completed`; step/token limits, unfinished tool loops and empty final answers are `incomplete` and exit nonzero, even if the model emitted earlier progress text. Inspect actual state before retrying partial work. A completed execution is not a correctness score.
+Set the key through your environment/secret manager. The model defaults to `anthropic/claude-sonnet-4-6`; select another supported Anthropic model with `COORDINATOR_MODEL` or `--model`. `--output-root DIR` selects the receipt directory. Help is `npm run coordinate -- --help`. Unknown, repeated or missing options fail before execution.
 
-`usage` covers all steps only when each step has reported measurements. `lastStepUsage` is separate, `stepUsage` preserves the available SDK observations, and missing totals/cost remain null. Do not infer price or treat unreported usage as zero. The state file retains exact issue and channel effects plus an audit. There is no production-service fallback.
+`init` prints the selected task, stable request ID, write flag, dataset identity and hashes. Preserve that exact task/ID when recovering `partial-recovery` or `already-completed`, whose original intents already exist. `--allow-writes` authorizes mutations in the selected synthetic file. A read-only run cannot create a write-request journal entry. Legacy/custom synthetic files can use `init --seed FILE --state NEW_FILE`; this validates and privately copies the bytes without claiming manifest qualification.
 
-To let the agent make synthetic changes, pass `--allow-writes`. Supply a stable `--request-id` when retrying. The application binds it to the original task and injects operation IDs into the tools; model arguments cannot replace them. A changed task requires a new ID. One caller request can create one issue, choose one status per issue, and post one channel message. Additional intent uses a new request ID.
+The callable seam uses the same normal path:
 
-Issue creation and posts reject a different payload under the same ID. Status updates require a current revision for the first commit. Replays preserve the revision, return `replayed: true` and current issue state, and cannot undo a later request's changes. Titles are normalized for case/whitespace duplicate checks within the exact repository. The directory exposes owner teams and supported channels; the model can inspect recent channel posts when checking an earlier notification.
+```ts
+import { initializeCase } from './dist/src/datasets.js';
+import { coordinate } from './dist/src/agent.js';
+const selected = initializeCase('busy', 'run-output/workspace.json');
+const result = await coordinate({
+  ...selected,
+  model: 'anthropic/claude-sonnet-4-6',
+  signal: abortController.signal, // optional caller cancellation
+});
+console.log(result.receiptPath);
+```
 
-| Tool | Local supported operation |
+## Completion, budgets and ownership
+
+Normal runs allow eight model steps, 4,096 output tokens, 30 seconds per model call and 240 seconds overall. Model retries and processor retries are both zero. The pinned framework's separate stability defaults must also be disabled with `errorProcessorDefaults:false`: zero model retries and an empty processor list alone still produced three 503 attempts. Native tests verify one failed attempt after a committed issue, caller cancellation and a deadline reaching the actual fetch signal. CLI SIGINT/SIGTERM use that cancellation path.
+
+`src/completion.ts` holds each complete native response before Mastra receives chunks that could trigger tools. The original native regression created an issue from `max_tokens` output. An output processor alone also failed to prevent that effect. The model boundary now rejects unfinished, inconsistent, parallel and blank output before tool dispatch. It preserves accepted native data, including the pinned v2 router's v3 unified/raw finish metadata. The qualified transport is nonstreaming Messages JSON through `agent.generate()`; no wire-level SSE qualification is claimed.
+
+A receipt's `completed` status means SDK stop plus a nonempty terminal answer. `incomplete` means no valid terminal answer, such as a stopped tool loop. `failed` means an unhandled error, cancellation or recording failure. A handled tool error can be followed by a completed model turn: **inspect its recorded result and actual state to judge task correctness.** A final sentence is not a score. Incomplete outcomes have an empty terminal answer and preserve available progress separately. CLI exits nonzero for incomplete/failed runs; callable errors retain the original SDK exception plus `observations`, `evidence` and `receiptPath`.
+
+`coordinate` owns its abort controller, response readers, observation callbacks and in-process workspace claim. Concurrent calls to the same canonical file (including aliases) are rejected and the claim is released on exit. Use one CLI/process per file: there is no cross-process lock. `buildCoordinator` is a lower-level seam whose caller owns exclusivity and lifecycle. Mastra owns its model cache/shared fetch transport; the app does not close global/caller resources or clear private SDK caches. No durable agent conversation/memory is configured.
+
+## Effects and supported tools
+
+| Tool | Supported local operation |
 |---|---|
-| `listRepositories` | Exact slugs, descriptions, owner teams, repository channels and available channels |
-| `findIssues` | Title/body search, optionally scoped to an exact repository |
-| `readChannel` | Last 20 posts for an exact supported channel; no pagination |
-| `createIssue` | One caller-bound issue creation with normalized-title duplicate checks |
-| `updateIssue` | Revision-checked status update with replay/current-state evidence |
-| `postMessage` | One caller-bound post in an available channel |
+| `listRepositories` | Exact slugs, owner teams, preferred repository channels and currently available channels |
+| `findIssues` | Case-insensitive ID/title/body search, optionally restricted to an exact repository |
+| `readChannel` | Latest 20 posts for one currently available channel; no pagination |
+| `createIssue` | One caller-bound creation, normalized-title duplicate checks within an exact repository |
+| `updateIssue` | Current integer revision required for an initial status change; replay returns current state |
+| `postMessage` | One caller-bound post to an available channel |
 
-Without `--allow-writes`, write tools reject changes and no write-request journal entry is created. With authorization, task bindings survive model failure so a retry can retain its identity. Tools reload state per operation; this is a sequential local store, with no cross-process transaction lock. Saves flush a temporary file before replacement and clean up the staged file.
+Request IDs belong to the application and are bound to the exact task. Tool schemas expose no model-controlled retry ID. Altered create/post payloads and a changed task under an existing ID fail. One request may choose one status per issue. A replay cannot undo later work: its current state and `replayed:true` do not prove the old requested status remains current. Duplicate attempts can append audit observations while business effects remain idempotent.
 
-## Scenarios and reset
+Every operation reloads state. Schemas reject duplicate identities, invalid/coerced revisions/statuses, orphan issue/history/audit references and malformed records. Imported ID gaps are retained; new IDs advance from the maximum, with safe-integer exhaustion checks. Staged files are private, flushed and atomically replaced; state and audit/journal changes publish together. State and receipt files are separate publications, not a cross-file transaction. Earlier committed effects survive later model, tool or recording failure; there is no rollback or automatic provider retry. Tools record returned errors and thrown exceptions alongside current state.
 
-Five fictional fixtures embed dataset `synthetic-project-workspace`, version `1`: starter, stale revision, busy ordinary, ambiguous cross-repository titles and no available channels. The busy profile has three repositories, six issues and earlier owner-team posts. See [scenarios/README.md](scenarios/README.md) for case inputs and their profile. Start each independent case with a new `run-output/` state path; `init` refuses to overwrite it. Stop the owning CLI process before deleting/replacing its copy. No external service is reset, and the committed seed is unchanged by runs.
+These are narrow synthetic subsets, not GitHub/Linear/Slack API compatibility. No real service account or production fallback is used.
 
-## Offline check and CI
+## Evidence and usage
+
+Each run writes schema-version-1 `receipt.json` under `<state-directory>/runs/<run-id>/` by default. Directories are mode 0700 and files 0600. Atomic receipts are updated before model execution, on model observations, after tool results and on exit. They retain task/prompt hashes, request/run IDs, declared dependency and requested/reported model identifiers, actual initial/final file hashes, declared dataset identity, timestamps, tool IDs/arguments/results and state counts. Provider credentials are not copied from environment/configuration into receipts.
+
+Provider bodies come from the SDK's preserved decoded JSON or error-body text, including unknown fields, HTTP error status/request IDs and rejected output. These are SDK representations, not byte-exact network captures. Capture is limited to 1 MiB (8,192 normalized chunks); oversized output stops before tools and retains available usage. Malformed JSON remains body text. A running receipt after forced termination is not completion evidence: inspect its workspace. Persistent disk failure exposes the in-memory failed `error.evidence` with `evidenceError` instead of claiming publication succeeded.
+
+`reportedUsage` uses only fields actually present in the provider body. Missing, partial, invalid and explicitly reported zero counts remain distinct. Input totals combine uncached, cache-creation and cache-read counts, following the [Anthropic usage definition](https://platform.claude.com/docs/en/build-with-claude/prompt-caching). An aggregate is complete only when all four counts are available for every observation; available individual fields remain inspectable otherwise. Failed attempts are included when they report measurements. Cost stays unknown. The legacy `usage`, `totalUsage`-derived totals and `stepUsage` fields are labeled normalized SDK observations; SDK-filled cache zeros cannot establish provider-reported zero.
+
+## Data and reset
+
+`synthetic-project-workspace` version **2** has eight hash-bound cases/four profiles: starter, busy, ambiguous owner, current revision, unavailable channel, partial recovery, hostile note and completed intent. Busy contains three repositories, 18 issues, 12 prior posts and ten coherent human handoffs, including noncontiguous message IDs. Prior effects are explicitly fictional human/local work; no model decisions, provider observations or measured usage are seeded. [Scenario briefs](scenarios/README.md) keep expectations outside model context. Only the task and selected tool records enter the agent.
+
+Listing validates all hashes; initialization checks file bytes and dataset/version/profile/case identity, then exclusively creates a private copy. A separate state path is required for each independent case. Stop its owner and recreate a disposable copy to reset. Reset does not erase receipts, provider billing/retention or SDK process-wide transport caches. The receipt's actual input hash is authoritative; inherited dataset metadata alone does not prove a previously edited file is still its original snapshot. The five version-1 fixtures remain authoring/compatibility inputs.
+
+## Verify and package
 
 ```sh
-npm ci
 npm run check
+npm run fixtures:build
+npm run check:package
+npm run package
 ```
 
-The original scripted checks include an actual Mastra `generate()` loop with the SDK's scripted model, actual tool execution and persisted state effects. They verify caller-owned IDs, read-only behavior, status replay after later work, partial recovery, busy/ambiguous data, all-step versus last-step usage, missing measurements, incomplete loops and empty terminal answers. Scripted token values exercise serialization; they are not live provider usage or a benchmark. An authorized live Claude run and measured evidence remain pending. Direct dependencies are Mastra `1.77.0` and Zod `4.6.7`, resolved in `package-lock.json`.
+The 57 offline checks include actual Mastra/router/Anthropic-adapter execution over controlled fetch, CLI failure/SIGTERM, partial effects, receipt/storage failures, usage provenance, coherent busy/recovery flows, state integrity and dataset drift. The older scripted-model tests remain separate. Controlled provider/tool choices prove application boundaries; they do not measure Claude judgment, paid usage or a success rate. No scripted production mode exists.
 
-The scoped argparse override removes the inherited `sprintf-js` dependency while preserving Mastra's YAML front-matter and CLI contracts. A guarded install-time repair retains the legacy CLI version option. See [scripts/README.md](scripts/README.md) for the exact compatibility change and removal criteria. The dependency follow-up qualified fresh `npm ci`, 22 checks and `npm audit` (zero findings at the 2026-10-15 snapshot).
+The locked source archive includes source, compiled code, tests, datasets and the lockfile. Its gate installs dependencies, builds and runs help/list/eight private initializations, missing-key preflight and real ID/revision operations outside the checkout. Ordinary `npm ci` runs the existing guarded argparse postinstall repair; see [scripts/README.md](scripts/README.md). The archive gate explicitly applies that same repair after skipping dependency install scripts. CI also regenerates exact dataset bytes. Tar-based packaging is exercised on macOS and Linux.
 
-## Native completion follow-up
-
-The current 31-check suite adds nine cases through the actual Mastra model router and bundled Anthropic HTTP adapter, with controlled fetch responses and synthetic keys. A native `max_tokens` response containing `createIssue` previously created an issue even though the overall loop was incomplete. The first attempted output-processor guard also allowed the issue to be created: this pinned pipeline can execute tool chunks before that processor aborts.
-
-`src/completion.ts` now holds each native model response until its finish is validated, before any chunks reach tool execution. It preserves accepted native chunks/metadata and rejects truncated, inconsistent, parallel and empty responses. The pinned router exposes v2 while its bundled adapter emits v3 unified/raw finish metadata; both the normalized reason and original pair are retained. Native stream evidence is bounded to 1 MiB/8,192 chunks. The six native cases verify a completed tool plus final answer, max-tokens tool/final output, inconsistent end-turn tool calls, parallel calls and blank output. They use the normal model-router path and actual local tools, without a fake agent or model class. No provider request leaves the process.
-
-`modelStepObservations` keeps SDK text/tool/finish/usage observations, including rejected output. Callable errors retain `observations`, including available SDK error status/body/request IDs; earlier authorized effects remain committed if a later answer is rejected. Incomplete receipts have an empty terminal answer and keep available progress separately. These SDK observations are distinct from byte-level provider evidence; missing/normalized usage and cost require the remaining transport qualification. The native budget follow-up configures 8 steps, 4,096 output tokens, 30 seconds per model call and 240 seconds per run, with caller cancellation and CLI signal handling. A failure probe exposed three attempts after a 503 despite zero model retries: Mastra's separate default stability processors also resubmit calls. `errorProcessorDefaults:false` plus zero model/processor retry budgets disables those paths through public configuration. Native checks verify exactly one failed attempt after a committed issue, retention of original SDK error/body/request ID, caller cancellation and a step deadline aborting the actual fetch signal. The SDK error object is preserved without a vendor patch or custom exception workaround.
-
-Durable failed-run reports, full raw-usage provenance, hash-bound initialization and a locked package outside checkout remain unqualified. Those tasks remain next, followed by a selected live model/Firedrill proof. No live judgment or benchmark is inferred from controlled choices.
-
-## Firedrill connection and limits
-
-The future integration seam is the CLI task, a per-case state file, JSON completion output, and the state/audit diff. Add it only against the released new Firedrill interface. No retired commands, simulated report, or CI Firedrill run is claimed here. This repository is private and unlicensed pending portfolio publication decisions.
-
-Implementation reference: [Mastra agent and tool documentation](https://mastra.ai/docs).
-
-Explore related applications in the [Firedrill example catalog](https://github.com/firedrill-tools/firedrill-example-catalog). Product and setup references: [Firedrill](https://firedrill.run/) and the [official developer documentation](https://docs.firedrill.run/). Use documentation matching the qualified release; this repository records its current integration limits above.
+Live model quality/budget, new released Firedrill integration and publication/license approval remain external gates. Add a thin adapter through the existing callable/CLI/state/receipt seams only after the official interface is qualified. Explore the [example catalog](https://github.com/firedrill-tools/firedrill-example-catalog), [Firedrill](https://firedrill.run/) and [official documentation](https://docs.firedrill.run/).

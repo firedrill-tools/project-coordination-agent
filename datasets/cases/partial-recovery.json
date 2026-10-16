@@ -1,0 +1,73 @@
+{
+  "synthetic": true,
+  "version": 1,
+  "dataset": {
+    "id": "synthetic-project-workspace",
+    "version": 2,
+    "profile": "boundary",
+    "caseId": "partial-recovery",
+    "provenance": "Fictional Northstar Notes business records and prior human/local effects. No model decisions, provider observations or measured usage are seeded."
+  },
+  "repositories": [
+    {
+      "slug": "northstar/web-app",
+      "description": "Customer-facing Northstar Notes web application",
+      "ownerTeam": "Web Experience",
+      "channel": "product"
+    },
+    {
+      "slug": "northstar/infra",
+      "description": "Deployment and operations configuration",
+      "ownerTeam": "Platform",
+      "channel": "engineering"
+    }
+  ],
+  "issues": [
+    {
+      "id": "N-101",
+      "repository": "northstar/web-app",
+      "title": "Admin invite button returns a permission error",
+      "body": "An account admin cannot invite a teammate from the workspace settings page.",
+      "status": "open",
+      "revision": 1,
+      "requestId": "seed-101"
+    },
+    {
+      "id": "N-102",
+      "repository": "northstar/infra",
+      "title": "Build pipeline has intermittent latency",
+      "body": "Nightly build can take over 20 minutes.",
+      "status": "open",
+      "revision": 1,
+      "requestId": "seed-102"
+    },
+    {
+      "id": "N-103",
+      "repository": "northstar/web-app",
+      "title": "Sync recovery after reconnect",
+      "body": "Sync fails after reconnect",
+      "status": "open",
+      "revision": 1,
+      "requestId": "recover-sync"
+    }
+  ],
+  "channels": [
+    "product",
+    "engineering"
+  ],
+  "posts": [],
+  "audit": [
+    {
+      "operation": "create_issue",
+      "target": "N-103",
+      "outcome": "success"
+    }
+  ],
+  "requests": [
+    {
+      "id": "recover-sync",
+      "task": "Create a Sync recovery after reconnect issue in northstar/web-app with body \"Sync fails after reconnect\" and notify product. Do not duplicate a previous matching change."
+    }
+  ],
+  "updates": []
+}

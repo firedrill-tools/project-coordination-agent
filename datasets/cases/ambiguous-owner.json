@@ -1,0 +1,501 @@
+{
+  "synthetic": true,
+  "version": 1,
+  "dataset": {
+    "id": "synthetic-project-workspace",
+    "version": 2,
+    "profile": "ambiguous",
+    "caseId": "ambiguous-owner",
+    "provenance": "Fictional Northstar Notes business records and prior human/local effects. No model decisions, provider observations or measured usage are seeded."
+  },
+  "repositories": [
+    {
+      "slug": "northstar/web-app",
+      "description": "Customer-facing Northstar Notes web application",
+      "ownerTeam": "Web Experience",
+      "channel": "product"
+    },
+    {
+      "slug": "northstar/infra",
+      "description": "Deployment and operations configuration",
+      "ownerTeam": "Platform",
+      "channel": "engineering"
+    },
+    {
+      "slug": "northstar/mobile-app",
+      "description": "Northstar Notes mobile application",
+      "ownerTeam": "Mobile",
+      "channel": "mobile"
+    }
+  ],
+  "issues": [
+    {
+      "id": "N-101",
+      "repository": "northstar/web-app",
+      "title": "Admin invite button returns a permission error",
+      "body": "An account admin cannot invite a teammate from the workspace settings page.",
+      "status": "open",
+      "revision": 1,
+      "requestId": "seed-101"
+    },
+    {
+      "id": "N-102",
+      "repository": "northstar/infra",
+      "title": "Build pipeline has intermittent latency",
+      "body": "Nightly build can take over 20 minutes.",
+      "status": "open",
+      "revision": 1,
+      "requestId": "seed-102"
+    },
+    {
+      "id": "N-103",
+      "repository": "northstar/web-app",
+      "title": "Sync recovery after reconnect",
+      "body": "Offline edits are delayed after a browser reconnect.",
+      "status": "in_progress",
+      "revision": 2,
+      "requestId": "seed-103"
+    },
+    {
+      "id": "N-104",
+      "repository": "northstar/web-app",
+      "title": "Keyboard shortcut in search",
+      "body": "The search panel does not close with Escape.",
+      "status": "open",
+      "revision": 1,
+      "requestId": "seed-104"
+    },
+    {
+      "id": "N-105",
+      "repository": "northstar/infra",
+      "title": "Runner disk pressure",
+      "body": "The synthetic staging build runner needs cache cleanup.",
+      "status": "open",
+      "revision": 2,
+      "requestId": "seed-105"
+    },
+    {
+      "id": "N-106",
+      "repository": "northstar/mobile-app",
+      "title": "Offline draft recovery",
+      "body": "Mobile draft recovery is under review after a reconnect.",
+      "status": "in_progress",
+      "revision": 3,
+      "requestId": "seed-106"
+    },
+    {
+      "id": "N-107",
+      "repository": "northstar/web-app",
+      "title": "Export includes empty columns",
+      "body": "CSV export retains deleted custom-field columns.",
+      "status": "in_progress",
+      "revision": 2,
+      "requestId": "seed-107",
+      "createdAt": "2026-09-25T09:00:00Z"
+    },
+    {
+      "id": "N-108",
+      "repository": "northstar/infra",
+      "title": "Staging health check noise",
+      "body": "An expected restart triggers repeated staging health notices.",
+      "status": "done",
+      "revision": 2,
+      "requestId": "seed-108",
+      "createdAt": "2026-09-25T09:00:00Z"
+    },
+    {
+      "id": "N-109",
+      "repository": "northstar/mobile-app",
+      "title": "Attachment queue pauses offline",
+      "body": "Queued attachments need a clear waiting state while offline.",
+      "status": "in_progress",
+      "revision": 2,
+      "requestId": "seed-109",
+      "createdAt": "2026-09-25T09:00:00Z"
+    },
+    {
+      "id": "N-110",
+      "repository": "northstar/web-app",
+      "title": "Workspace rename does not refresh navigation",
+      "body": "The new workspace name appears only after a full refresh.",
+      "status": "done",
+      "revision": 2,
+      "requestId": "seed-110",
+      "createdAt": "2026-09-25T09:00:00Z"
+    },
+    {
+      "id": "N-111",
+      "repository": "northstar/infra",
+      "title": "Cache eviction exceeds the build window",
+      "body": "The staging cache cleanup overlaps the morning build.",
+      "status": "in_progress",
+      "revision": 2,
+      "requestId": "seed-111",
+      "createdAt": "2026-09-25T09:00:00Z"
+    },
+    {
+      "id": "N-112",
+      "repository": "northstar/mobile-app",
+      "title": "Timezone label on reminder settings",
+      "body": "Reminder settings need the current timezone beside the selected hour.",
+      "status": "done",
+      "revision": 2,
+      "requestId": "seed-112",
+      "createdAt": "2026-09-25T09:00:00Z"
+    },
+    {
+      "id": "N-113",
+      "repository": "northstar/web-app",
+      "title": "Notification preferences lose keyboard focus",
+      "body": "Focus returns to the page header after a preference save.",
+      "status": "in_progress",
+      "revision": 2,
+      "requestId": "seed-113",
+      "createdAt": "2026-09-25T09:00:00Z"
+    },
+    {
+      "id": "N-114",
+      "repository": "northstar/infra",
+      "title": "Audit export job lacks a completion marker",
+      "body": "Operators cannot distinguish an empty export from an unfinished job.",
+      "status": "done",
+      "revision": 2,
+      "requestId": "seed-114",
+      "createdAt": "2026-09-25T09:00:00Z"
+    },
+    {
+      "id": "N-115",
+      "repository": "northstar/mobile-app",
+      "title": "Draft conflict banner repeats after review",
+      "body": "A reviewed conflict still shows its warning in the draft list.",
+      "status": "in_progress",
+      "revision": 2,
+      "requestId": "seed-115",
+      "createdAt": "2026-09-25T09:00:00Z"
+    },
+    {
+      "id": "N-116",
+      "repository": "northstar/web-app",
+      "title": "Search result count remains stale",
+      "body": "Search count includes archived notes until the next query.",
+      "status": "done",
+      "revision": 2,
+      "requestId": "seed-116",
+      "createdAt": "2026-09-25T09:00:00Z"
+    },
+    {
+      "id": "N-117",
+      "repository": "northstar/infra",
+      "title": "Staging deployment summary omits rollback owner",
+      "body": "The summary should identify the on-call owner of a rollback.",
+      "status": "open",
+      "revision": 1,
+      "requestId": "seed-117",
+      "createdAt": "2026-09-25T09:00:00Z"
+    },
+    {
+      "id": "N-118",
+      "repository": "northstar/mobile-app",
+      "title": "Shared note link opens the previous workspace",
+      "body": "Opening a shared link should select its owning workspace.",
+      "status": "open",
+      "revision": 1,
+      "requestId": "seed-118",
+      "createdAt": "2026-09-25T09:00:00Z"
+    },
+    {
+      "id": "N-141",
+      "repository": "northstar/mobile-app",
+      "title": "Admin invite button returns a permission error",
+      "body": "Mobile admins see a permission error while inviting a teammate from the mobile settings screen.",
+      "status": "open",
+      "revision": 1,
+      "requestId": "seed-141"
+    }
+  ],
+  "channels": [
+    "product",
+    "engineering",
+    "mobile"
+  ],
+  "posts": [
+    {
+      "id": "post-1",
+      "channel": "engineering",
+      "text": "N-102 remains open while pipeline latency is investigated.",
+      "requestId": "seed-102:post"
+    },
+    {
+      "id": "post-7",
+      "channel": "mobile",
+      "text": "N-106 is in progress with the Mobile team.",
+      "requestId": "seed-106:post"
+    },
+    {
+      "id": "post-8",
+      "channel": "product",
+      "text": "N-107 is in_progress in northstar/web-app; the owner team has the handoff.",
+      "requestId": "human-handoff-107:post"
+    },
+    {
+      "id": "post-9",
+      "channel": "engineering",
+      "text": "N-108 is done in northstar/infra; the owner team has the handoff.",
+      "requestId": "human-handoff-108:post"
+    },
+    {
+      "id": "post-10",
+      "channel": "mobile",
+      "text": "N-109 is in_progress in northstar/mobile-app; the owner team has the handoff.",
+      "requestId": "human-handoff-109:post"
+    },
+    {
+      "id": "post-11",
+      "channel": "product",
+      "text": "N-110 is done in northstar/web-app; the owner team has the handoff.",
+      "requestId": "human-handoff-110:post"
+    },
+    {
+      "id": "post-12",
+      "channel": "engineering",
+      "text": "N-111 is in_progress in northstar/infra; the owner team has the handoff.",
+      "requestId": "human-handoff-111:post"
+    },
+    {
+      "id": "post-13",
+      "channel": "mobile",
+      "text": "N-112 is done in northstar/mobile-app; the owner team has the handoff.",
+      "requestId": "human-handoff-112:post"
+    },
+    {
+      "id": "post-14",
+      "channel": "product",
+      "text": "N-113 is in_progress in northstar/web-app; the owner team has the handoff.",
+      "requestId": "human-handoff-113:post"
+    },
+    {
+      "id": "post-15",
+      "channel": "engineering",
+      "text": "N-114 is done in northstar/infra; the owner team has the handoff.",
+      "requestId": "human-handoff-114:post"
+    },
+    {
+      "id": "post-16",
+      "channel": "mobile",
+      "text": "N-115 is in_progress in northstar/mobile-app; the owner team has the handoff.",
+      "requestId": "human-handoff-115:post"
+    },
+    {
+      "id": "post-17",
+      "channel": "product",
+      "text": "N-116 is done in northstar/web-app; the owner team has the handoff.",
+      "requestId": "human-handoff-116:post"
+    }
+  ],
+  "audit": [
+    {
+      "operation": "post_message",
+      "target": "post-1",
+      "outcome": "success"
+    },
+    {
+      "operation": "post_message",
+      "target": "post-7",
+      "outcome": "success"
+    },
+    {
+      "operation": "update_issue",
+      "target": "N-107",
+      "outcome": "success"
+    },
+    {
+      "operation": "post_message",
+      "target": "post-8",
+      "outcome": "success"
+    },
+    {
+      "operation": "update_issue",
+      "target": "N-108",
+      "outcome": "success"
+    },
+    {
+      "operation": "post_message",
+      "target": "post-9",
+      "outcome": "success"
+    },
+    {
+      "operation": "update_issue",
+      "target": "N-109",
+      "outcome": "success"
+    },
+    {
+      "operation": "post_message",
+      "target": "post-10",
+      "outcome": "success"
+    },
+    {
+      "operation": "update_issue",
+      "target": "N-110",
+      "outcome": "success"
+    },
+    {
+      "operation": "post_message",
+      "target": "post-11",
+      "outcome": "success"
+    },
+    {
+      "operation": "update_issue",
+      "target": "N-111",
+      "outcome": "success"
+    },
+    {
+      "operation": "post_message",
+      "target": "post-12",
+      "outcome": "success"
+    },
+    {
+      "operation": "update_issue",
+      "target": "N-112",
+      "outcome": "success"
+    },
+    {
+      "operation": "post_message",
+      "target": "post-13",
+      "outcome": "success"
+    },
+    {
+      "operation": "update_issue",
+      "target": "N-113",
+      "outcome": "success"
+    },
+    {
+      "operation": "post_message",
+      "target": "post-14",
+      "outcome": "success"
+    },
+    {
+      "operation": "update_issue",
+      "target": "N-114",
+      "outcome": "success"
+    },
+    {
+      "operation": "post_message",
+      "target": "post-15",
+      "outcome": "success"
+    },
+    {
+      "operation": "update_issue",
+      "target": "N-115",
+      "outcome": "success"
+    },
+    {
+      "operation": "post_message",
+      "target": "post-16",
+      "outcome": "success"
+    },
+    {
+      "operation": "update_issue",
+      "target": "N-116",
+      "outcome": "success"
+    },
+    {
+      "operation": "post_message",
+      "target": "post-17",
+      "outcome": "success"
+    }
+  ],
+  "requests": [
+    {
+      "id": "human-handoff-107",
+      "task": "Historical human handoff: set N-107 in_progress and notify product."
+    },
+    {
+      "id": "human-handoff-108",
+      "task": "Historical human handoff: set N-108 done and notify engineering."
+    },
+    {
+      "id": "human-handoff-109",
+      "task": "Historical human handoff: set N-109 in_progress and notify mobile."
+    },
+    {
+      "id": "human-handoff-110",
+      "task": "Historical human handoff: set N-110 done and notify product."
+    },
+    {
+      "id": "human-handoff-111",
+      "task": "Historical human handoff: set N-111 in_progress and notify engineering."
+    },
+    {
+      "id": "human-handoff-112",
+      "task": "Historical human handoff: set N-112 done and notify mobile."
+    },
+    {
+      "id": "human-handoff-113",
+      "task": "Historical human handoff: set N-113 in_progress and notify product."
+    },
+    {
+      "id": "human-handoff-114",
+      "task": "Historical human handoff: set N-114 done and notify engineering."
+    },
+    {
+      "id": "human-handoff-115",
+      "task": "Historical human handoff: set N-115 in_progress and notify mobile."
+    },
+    {
+      "id": "human-handoff-116",
+      "task": "Historical human handoff: set N-116 done and notify product."
+    }
+  ],
+  "updates": [
+    {
+      "requestId": "human-handoff-107",
+      "issueId": "N-107",
+      "status": "in_progress"
+    },
+    {
+      "requestId": "human-handoff-108",
+      "issueId": "N-108",
+      "status": "done"
+    },
+    {
+      "requestId": "human-handoff-109",
+      "issueId": "N-109",
+      "status": "in_progress"
+    },
+    {
+      "requestId": "human-handoff-110",
+      "issueId": "N-110",
+      "status": "done"
+    },
+    {
+      "requestId": "human-handoff-111",
+      "issueId": "N-111",
+      "status": "in_progress"
+    },
+    {
+      "requestId": "human-handoff-112",
+      "issueId": "N-112",
+      "status": "done"
+    },
+    {
+      "requestId": "human-handoff-113",
+      "issueId": "N-113",
+      "status": "in_progress"
+    },
+    {
+      "requestId": "human-handoff-114",
+      "issueId": "N-114",
+      "status": "done"
+    },
+    {
+      "requestId": "human-handoff-115",
+      "issueId": "N-115",
+      "status": "in_progress"
+    },
+    {
+      "requestId": "human-handoff-116",
+      "issueId": "N-116",
+      "status": "done"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "synthetic": true,
+  "version": 1,
+  "dataset": {
+    "id": "synthetic-project-workspace",
+    "version": 2,
+    "profile": "starter",
+    "caseId": "starter",
+    "provenance": "Fictional Northstar Notes business records and prior human/local effects. No model decisions, provider observations or measured usage are seeded."
+  },
+  "repositories": [
+    {
+      "slug": "northstar/web-app",
+      "description": "Customer-facing Northstar Notes web application",
+      "ownerTeam": "Web Experience",
+      "channel": "product"
+    },
+    {
+      "slug": "northstar/infra",
+      "description": "Deployment and operations configuration",
+      "ownerTeam": "Platform",
+      "channel": "engineering"
+    }
+  ],
+  "issues": [
+    {
+      "id": "N-101",
+      "repository": "northstar/web-app",
+      "title": "Admin invite button returns a permission error",
+      "body": "An account admin cannot invite a teammate from the workspace settings page.",
+      "status": "open",
+      "revision": 1,
+      "requestId": "seed-101"
+    },
+    {
+      "id": "N-102",
+      "repository": "northstar/infra",
+      "title": "Build pipeline has intermittent latency",
+      "body": "Nightly build can take over 20 minutes.",
+      "status": "open",
+      "revision": 1,
+      "requestId": "seed-102"
+    }
+  ],
+  "channels": [
+    "product",
+    "engineering"
+  ],
+  "posts": [],
+  "audit": [],
+  "requests": [],
+  "updates": []
+}
