@@ -3,3 +3,5 @@ dist/
 .env
 run-output/
 *.tar.gz
+
+.runs/

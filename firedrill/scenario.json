@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "2026-10-14",
+  "name": "Project coordination \u2014 actual Mastra application",
+  "target": {
+    "kind": "command",
+    "argv": [
+      "node",
+      "firedrill/target.mjs"
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "starter",
+      "name": "Inspect the exact issue",
+      "input": {
+        "caseId": "starter",
+        "task": "Find the admin invite issue in northstar/web-app and summarize its current status. Make no changes.",
+        "allowWrites": false
+      }
+    },
+    {
+      "id": "busy",
+      "name": "Authorized synthetic issue and owner update",
+      "input": {
+        "caseId": "busy",
+        "task": "Mark N-103 (Sync recovery after reconnect) in northstar/web-app done and post its current status to the repository owner channel. Preserve all other issues and prior posts.",
+        "allowWrites": true
+      }
+    },
+    {
+      "id": "ambiguous-owner",
+      "name": "Ambiguous repository identity",
+      "input": {
+        "caseId": "ambiguous-owner",
+        "task": "Inspect the matching admin invite permission-error issues. Explain which repository identity is missing without making changes.",
+        "allowWrites": false
+      }
+    }
+  ],
+  "repetitions": 1,
+  "concurrency": 1,
+  "limits": {
+    "timeoutMs": 300000,
+    "maxRuns": 3,
+    "maxOutputBytes": 4194304
+  }
+}

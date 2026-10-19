@@ -15,4 +15,6 @@ jobs:
       - run: npm run fixtures:build
       - run: git diff --exit-code -- datasets
       - run: npm run check
+      - run: npm ci --prefix firedrill --ignore-scripts --no-audit --no-fund
+      - run: npm test --prefix firedrill
       - run: npm run check:package

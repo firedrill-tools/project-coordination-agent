@@ -14,3 +14,7 @@
 - `npm run check` has 57 offline checks, including native CLI/SDK, storage failure, busy/recovery and data drift. `npm run check:package` builds a locked archive outside checkout and verifies its CLI/data/service behavior. It applies the existing guarded argparse repair after an ignore-scripts install; preserve parser compatibility tests and removal criteria in scripts/README.md.
 - Pending-fetch test promises need an owned socket-equivalent ref'd handle because SDK deadline timers are unref'd. Clear it on abort/exit; keep this harness detail out of production. The CLI preload under tests is test-only and never imported by a normal run. Controlled choices are not live model judgment or measured billing.
 - Fictional data only; no production account fallback, retired Firedrill API or invented platform client. Live provider/budget, released Firedrill contract and public visibility/license decisions remain parked.
+
+## Current Firedrill connection — 2026-10-19
+
+Read `firedrill/README.md` for the optional pinned CLI/SDK 2.2.2 command adapter. Preserve actual Mastra execution and explicit caller write permission; selecting a case never grants writes. Keep fresh private state/evidence per invocation and preserve failed attempts. Run integration tests and the existing full source-package gate. Current release availability supersedes older pending-release notes, while authenticated persisted and live model proofs remain pending.

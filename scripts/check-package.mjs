@@ -13,6 +13,8 @@ const run = (command, args, cwd) => execFileSync(command, args, { cwd, env, enco
 try {
   run('npm', ['run','build'], root);
   const archive = path.join(temporary, 'source.tar.gz'); run(process.execPath, ['scripts/package.mjs', archive], root);
+  const entries = run('tar', ['-tzf', archive], temporary).split('\n');
+  if (!entries.includes('package/firedrill/package-lock.json') || entries.some(name => name.includes('/node_modules/') || name.includes('/.runs/'))) throw new Error('optional execution toolchain source missing or contains installed/private state');
   run('tar', ['-xzf', archive, '-C', temporary], temporary);
   const directory = path.join(temporary, 'package'), cli = path.join(directory, 'dist/src/cli.js');
   if (!fs.existsSync(path.join(directory, 'package-lock.json'))) throw new Error('archive lacks locked dependencies');
@@ -21,6 +23,8 @@ try {
   // skipping dependency install scripts; this is required by its parser contract.
   run(process.execPath, ['scripts/patch-argparse.cjs'], directory);
   run('npm', ['run','build'], directory); run(process.execPath, [cli,'--help'], temporary);
+  run('npm', ['ci','--prefix','firedrill','--ignore-scripts','--no-audit','--no-fund'], directory);
+  run('npm', ['test','--prefix','firedrill'], directory);
   const manifest = JSON.parse(run(process.execPath, [cli,'list'], temporary));
   if (manifest.cases.length !== 8) throw new Error('packaged dataset list differs');
   for (const item of manifest.cases) {

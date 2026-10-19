@@ -9,7 +9,7 @@ const target = path.resolve(process.argv[2] || path.join(root, 'run-output', `pr
 const staging = fs.mkdtempSync(path.join(os.tmpdir(), 'firedrill-coordinator-source-'));
 try {
   const directory = path.join(staging, 'package'); fs.mkdirSync(directory);
-  for (const name of ['src','dist','fixtures','datasets','tests','scripts','scenarios','README.md','AGENTS.md','package.json','package-lock.json','tsconfig.json','.gitattributes','.gitignore']) fs.cpSync(path.join(root, name), path.join(directory, name), { recursive: true });
+  for (const name of ['src','dist','fixtures','datasets','tests','scripts','scenarios','firedrill','.github','README.md','AGENTS.md','package.json','package-lock.json','tsconfig.json','.gitattributes','.gitignore']) fs.cpSync(path.join(root, name), path.join(directory, name), { recursive: true, filter: source => !['node_modules','.runs'].includes(path.basename(source)) });
   fs.mkdirSync(path.dirname(target), { recursive: true });
   execFileSync('tar', ['-czf', target, '-C', staging, 'package'], { stdio: ['ignore','pipe','pipe'] });
   console.log(target);
