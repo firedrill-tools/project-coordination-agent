@@ -6,13 +6,13 @@ import { ApplicationError, commandMain, invokeCLI, privateDirectory } from './ad
 const root = fileURLToPath(new URL('../', import.meta.url));
 const cases = new Set(['starter', 'busy', 'ambiguous-owner']);
 
-export async function runApplication(input, parameters, signal) {
+export async function runApplication(input, parameters, signal, invocation) {
   if (Object.keys(input).some(key => !['caseId', 'task', 'allowWrites'].includes(key)) || !cases.has(input.caseId) ||
       typeof input.task !== 'string' || !input.task.trim() || input.task.length > 8000 || input.task.includes('\0') ||
       typeof input.allowWrites !== 'boolean') {
     throw new Error('Select a reviewed case, bounded task and explicit independent boolean write permission.');
   }
-  const directory = await privateDirectory(root);
+  const directory = await privateDirectory(root, invocation);
   const state = join(directory, 'workspace.json');
   const cli = [process.execPath, 'dist/src/cli.js'];
   try {

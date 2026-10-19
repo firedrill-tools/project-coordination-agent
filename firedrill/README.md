@@ -43,3 +43,5 @@ Preserve operation IDs and private journals after uncertainty. Recover with `--r
 Ordinary CI and the source-package gate run offline checks, including the actual missing-key boundary and fresh archived integration. Use the [live CI generator](https://docs.firedrill.run/guides/ci) only after actual scope, protected credentials and budgets are configured. Authenticated persisted runs, live model quality/cost, publication and licensing remain separate gates.
 
 References: [SDK](https://docs.firedrill.run/sdk/typescript), [command targets](https://docs.firedrill.run/guides/callbacks), [operator MCP](https://docs.firedrill.run/guides/control-mcp).
+
+Before application dispatch, each private workspace saves the validated outer run/attempt/scenario IDs in `invocation.json`. This maps interrupted runs to local state; it is separate from the SDK recovery journal and grants no application authority.
