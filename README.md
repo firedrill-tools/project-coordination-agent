@@ -1,6 +1,20 @@
-# Coordinate project handoffs with Mastra and Anthropic
+# Project coordination agent with Mastra and Claude
 
 Find the right repository and issue, read its current revision, update its status and notify its owner team. This TypeScript application uses a real Mastra agent and Anthropic Messages adapter against a coherent fictional issue tracker, repository directory and Slack-style channel store. State changes and model observations remain inspectable after failures.
+
+## Simulate with Firedrill
+
+[Firedrill](https://firedrill.run/) is a simulation platform for AI agents.
+Start from this repository’s root:
+
+```sh
+npx firedrill-run init
+```
+
+Sign in and choose your project, then follow the [simulation run guide](firedrill/README.md)
+for application dependencies, a preview and the reviewed scenarios. Your agent runs
+locally or in your CI; model credentials stay separate from Firedrill sign-in.
+The included recipes record outcomes without an automatic quality score or CI gate.
 
 ## Run one case
 
@@ -88,7 +102,7 @@ The 57 offline checks include actual Mastra/router/Anthropic-adapter execution o
 
 The locked source archive includes source, compiled code, tests, datasets and the lockfile. Its gate installs dependencies, builds and runs help/list/eight private initializations, missing-key preflight and real ID/revision operations outside the checkout. Ordinary `npm ci` runs the existing guarded argparse postinstall repair; see [scripts/README.md](scripts/README.md). The archive gate explicitly applies that same repair after skipping dependency install scripts. CI also regenerates exact dataset bytes. Tar-based packaging is exercised on macOS and Linux.
 
-Live model quality/budget, new released Firedrill integration and publication/license approval remain external gates. Add a thin adapter through the existing callable/CLI/state/receipt seams only after the official interface is qualified. Explore the [example catalog](https://github.com/firedrill-tools/firedrill-example-catalog), [Firedrill](https://firedrill.run/) and [official documentation](https://docs.firedrill.run/).
+Live model quality/budget, authenticated persisted Firedrill runs and publication/license approval remain external gates. The included Firedrill adapter uses the existing CLI/state/receipt seams. Explore the [example catalog](https://github.com/firedrill-tools/firedrill-example-catalog), [Firedrill](https://firedrill.run/) and [official documentation](https://docs.firedrill.run/).
 
 ## Current Firedrill connection — 2026-10-19
 
