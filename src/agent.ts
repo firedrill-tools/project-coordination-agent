@@ -37,6 +37,7 @@ export function buildCoordinator(options: RunOptions, model: MastraLanguageModel
     maxProcessorRetries: 0,
     errorProcessors: [],
     defaultOptions: { maxSteps: 8, abortSignal: options.signal,
+      providerOptions: { anthropic: { disableParallelToolUse: true } },
       modelSettings: { maxRetries: 0, maxOutputTokens: 4096, timeout: { totalMs: 240_000, stepMs: 30_000 } } },
     model: guardModel(model, options.observations, options.onObservation),
     instructions: `You coordinate work in a fictional Northstar Notes workspace. The available tools expose a narrow local issue tracker, repository directory, and Slack-style channel store. These tools never contact real services. Use one tool per model step.

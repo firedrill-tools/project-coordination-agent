@@ -53,6 +53,7 @@ async function native(t: TestContext, kind: string) {
 test("native Mastra Anthropic HTTP adapter executes a completed tool turn and terminal answer", async t => {
   const result = await native(t, "completed");
   assert.equal(result.requests.length, 2); assert.ok(result.requests.every(r => r.body.max_tokens === 4096)); assert.ok(result.requests.every(r => r.url === "https://api.anthropic.com/v1/messages"));
+  assert.ok(result.requests.every(r => (r.body.tool_choice as { disable_parallel_tool_use?: boolean })?.disable_parallel_tool_use === true));
   assert.equal(result.state.issues.length, 3); assert.ok(result.response); assert.equal(completedResponse(result.response), true);
   assert.deepEqual(result.observations.map(step => step.finishReason), ["tool-calls", "stop"]);
   assert.ok(result.observations.every(step => step.rejectedReason === null));
