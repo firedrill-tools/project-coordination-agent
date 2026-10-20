@@ -104,7 +104,7 @@ The 57 offline checks include actual Mastra/router/Anthropic-adapter execution o
 
 The locked source archive includes source, compiled code, tests, datasets and the lockfile. Its gate installs dependencies, builds and runs help/list/eight private initializations, missing-key preflight and real ID/revision operations outside the checkout. Ordinary `npm ci` runs the existing guarded argparse postinstall repair; see [scripts/README.md](scripts/README.md). The archive gate explicitly applies that same repair after skipping dependency install scripts. CI also regenerates exact dataset bytes. Tar-based packaging is exercised on macOS and Linux.
 
-Live model quality/budget, authenticated persisted Firedrill runs and license approval remain external gates. The included Firedrill adapter uses the existing CLI/state/receipt seams. Explore the [example catalog](https://github.com/firedrill-tools/firedrill-example-catalog), [Firedrill](https://firedrill.run/) and [official documentation](https://docs.firedrill.run/).
+Live model quality/budget, authenticated persisted Firedrill runs and license approval remain external gates. The included Firedrill adapter uses the existing CLI/state/receipt seams. Explore the [Firedrill examples](https://docs.firedrill.run/guides/examples), [Firedrill](https://firedrill.run/) and [official documentation](https://docs.firedrill.run/).
 
 ## Current Firedrill connection — 2026-10-19
 
